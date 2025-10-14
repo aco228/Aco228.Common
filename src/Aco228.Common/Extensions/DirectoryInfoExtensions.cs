@@ -2,6 +2,17 @@
 
 public static class DirectoryInfoExtensions
 {
+    public static void TryDelete(string path)
+    {
+        var di = new DirectoryInfo(path);
+        if (!di.Exists) return;
+        try
+        {
+            di.Delete(true);
+        }
+        catch{}
+    }
+    
     public static void CopyFilesRecursively(string sourcePath, string targetPath)
     {
         //Now Create all of the directories

@@ -73,6 +73,14 @@ public static class EnumExtensions
         return enumList;
     }
     
+    public static T GetAttribute<T>(Enum enumValue) where T : Attribute
+    {
+        var type = enumValue.GetType();
+        var memberInfo = type.GetMember(enumValue.ToString());
+        var attributes = memberInfo[0].GetCustomAttributes(typeof(T), false);
+        return attributes.Length > 0 ? (T)attributes[0] : null;
+    }
+    
     public static bool TryParseEnum<T>(int value, out T result) where T : struct, Enum
     {
         if (Enum.IsDefined(typeof(T), value))
