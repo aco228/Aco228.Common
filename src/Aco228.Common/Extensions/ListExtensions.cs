@@ -7,7 +7,14 @@ namespace Aco228.Common.Extensions;
 public static class ListExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Remove<T>(this List<T> list, Func<T, bool> predicate)
+    public static void RemoveOne<T>(this List<T> list, Func<T, bool> predicate)
+    {
+        foreach (var element in list.Where(predicate).ToList())
+            list.Remove(element);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RemoveOne<T>(this ConcurrentList<T> list, Func<T, bool> predicate)
     {
         foreach (var element in list.Where(predicate).ToList())
             list.Remove(element);
