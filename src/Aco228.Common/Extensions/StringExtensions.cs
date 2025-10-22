@@ -38,6 +38,9 @@ public static class StringExtensions
         return char.ToLowerInvariant(name[0]) + name.Substring(1);
     }
     
+    public static string ToDoubleString(this int input, string extension = "")
+        => input < 10 ? $"0{input}{extension}" :  $"{input}{extension}";
+    
     public static string ToDoubleString(this double input, string extension = "")
         => double.IsNaN(input) || double.IsInfinity(input) 
             ? "0" + extension 
