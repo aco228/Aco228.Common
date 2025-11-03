@@ -7,6 +7,7 @@ public interface IStorageFolder
     IStorageFolder GetFolder(string folderName, bool createIfNotExists = true);
 
     string GetPathForFile(string fileName);
+    string? ReadPathForFile(string fileName);
     DirectoryInfo GetDirectoryInside(string directoryPath, bool createIfNotExists = true);
 
     void DeleteAllContent();
@@ -48,6 +49,13 @@ public class StorageFolder : IStorageFolder
 
     public string GetPathForFile(string fileName)
         => Path.Combine(_directory.FullName, fileName.Replace("/", @"\"));
+
+    public string? ReadPathForFile(string fileName)
+    {
+        var path = GetPathForFile(fileName);
+        if (!File.Exists(path)) return null;
+        return File.ReadAllText(path);
+    }
 
     public DirectoryInfo GetDirectoryInside(string directoryPath, bool createIfNotExists = true)
     {
