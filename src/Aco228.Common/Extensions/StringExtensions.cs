@@ -1,4 +1,6 @@
-﻿namespace Aco228.Common.Extensions;
+﻿using System.Text;
+
+namespace Aco228.Common.Extensions;
 
 public static class StringExtensions
 {
@@ -9,7 +11,16 @@ public static class StringExtensions
         
         return input.Replace(toRemove, string.Empty);
     }
-    
+
+    public static string ToSha256(this string randomString)
+    {
+        var crypt = new System.Security.Cryptography.SHA256Managed();
+        var hash = new StringBuilder();
+        var crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(randomString));
+        foreach (byte theByte in crypto)
+            hash.Append(theByte.ToString("x2"));
+        return hash.ToString();
+    }    
     
     public static string GetUntilCharReverse(this string input, char lookFor)
     {
