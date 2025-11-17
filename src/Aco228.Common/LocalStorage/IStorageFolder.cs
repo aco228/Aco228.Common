@@ -30,6 +30,13 @@ public class StorageFolder : IStorageFolder
 {
     private readonly DirectoryInfo _directory;
 
+    public StorageFolder(string path)
+    {
+        var directory =  new DirectoryInfo(path);
+        if(!directory.Exists) throw new DirectoryNotFoundException(path);
+        _directory = directory;
+    }
+    
     public StorageFolder (DirectoryInfo directory)
     {
         _directory = directory;
