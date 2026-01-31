@@ -19,16 +19,38 @@ public static class DynamicDependencyInjectionExtension
                 continue;
 
             var interfaceTypes = assemblyType.GetInterfaces();
-            var inheritInterface = interfaceTypes.FirstOrDefault(x => x.IsInterface);
-            
-            if(typeof(IScoped).IsAssignableFrom(inheritInterface))
+            var inheritInterface = interfaceTypes
+                .Where(x => typeof(IScoped).IsAssignableFrom(x) || 
+                            typeof(ITransient).IsAssignableFrom(x) || 
+                            typeof(ISingleton).IsAssignableFrom(x))
+                .OrderByDescending(x => x.GetInterfaces().Length)
+                .FirstOrDefault();
+
+            string assemblyTypeSignature = $"{assembly.FullName?.Split(",").First()}::{assemblyType.Name}";
+            string type = "";
+
+            if (interfaceTypes.Contains(typeof(IScoped)))
+            {
+                type = "SCOPED";
                 services.AddScoped(inheritInterface, assemblyType);
-            
-            if(typeof(ITransient).IsAssignableFrom(inheritInterface))
+            }
+            if (interfaceTypes.Contains(typeof(ITransient)))
+            {
+                type = "TRANSIENT";
                 services.AddTransient(inheritInterface, assemblyType);
-            
-            if(typeof(ISingleton).IsAssignableFrom(inheritInterface))
+            }
+            if (interfaceTypes.Contains(typeof(ISingleton)))
+            {
+                type = "SINGLETON";
                 services.AddSingleton(inheritInterface, assemblyType);
+            }
+            else
+            {
+                Console.WriteLine($"Could not register {assemblyTypeSignature}");
+                continue;
+            }
+            
+            Console.WriteLine($"Registering [{type}] - {assemblyTypeSignature}");
             
         }
     }
