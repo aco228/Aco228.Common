@@ -39,7 +39,7 @@ public static class EnumExtensions
         if (string.IsNullOrEmpty(input))
             return null;
         
-        return Enum.TryParse(input, out T result) ? result : null;
+        return Enum.TryParse(input, ignoreCase: true, out T result) ? result : null;
     }
     
     
@@ -49,7 +49,7 @@ public static class EnumExtensions
         if (string.IsNullOrEmpty(input))
             return defaultValue;
         
-        return Enum.TryParse(input, out T result) ? result : defaultValue;
+        return Enum.TryParse(input, ignoreCase: true, out T result) ? result : defaultValue;
     }
     
     public static List<T> AsList<T>(this Enum input)

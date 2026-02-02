@@ -20,7 +20,38 @@ public static class StringExtensions
         foreach (byte theByte in crypto)
             hash.Append(theByte.ToString("x2"));
         return hash.ToString();
-    }    
+    }
+
+    public static string GetStringBetweenCharacters(this string input, char startChar, char endChar, bool onFirstEncounter = false)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(startChar) && !input.Contains(endChar))
+            return string.Empty;
+        
+        var result = new StringBuilder();
+        var inside = false;
+        var foundCount = 0;
+        
+        foreach (var inputChar in input)
+        {
+            if (inputChar == startChar)
+            {
+                inside = true;
+                foundCount++;
+                continue;
+            };
+
+            if (inputChar == endChar)
+                foundCount--;
+            
+            if(foundCount == 0 && inside)
+                break;
+            
+            if (inside)
+                result.Append(inputChar);
+        }
+        
+        return result.ToString();
+    }
     
     public static string GetUntilCharReverse(this string input, char lookFor)
     {
@@ -47,6 +78,15 @@ public static class StringExtensions
         
         if (string.IsNullOrEmpty(name) || char.IsLower(name[0])) return name;
         return char.ToLowerInvariant(name[0]) + name.Substring(1);
+    }
+    
+    
+    public static string ToPascalCase(this string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "";
+        
+        if (string.IsNullOrEmpty(name) || char.IsUpper(name[0])) return name;
+        return char.ToUpperInvariant(name[0]) + name.Substring(1);
     }
     
     public static string ToDoubleString(this int input, string extension = "")
