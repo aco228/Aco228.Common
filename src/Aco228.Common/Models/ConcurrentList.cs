@@ -45,6 +45,19 @@ public class ConcurrentList<T> : IEnumerable<T>
         }
     }
 
+    public void AddRange(IEnumerable<T> item)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _list.AddRange(item);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
     public bool Remove(T item)
     {
         _lock.EnterWriteLock();
