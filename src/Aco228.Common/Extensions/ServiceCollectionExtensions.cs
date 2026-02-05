@@ -8,8 +8,9 @@ namespace Aco228.Common.Extensions;
 public static class DynamicDependencyInjectionExtension
 {
     private static List<Action<ServiceProvider>> _actions = new();
+    private static List<Func<ServiceProvider, Task>> _asyncActions = new();
     
-    public static ServiceProvider BuildCollection(this IServiceCollection services)
+    public static async Task<ServiceProvider> BuildCollection(this IServiceCollection services)
     {
         var provider =  services.BuildServiceProvider();
         ServiceProviderHelper.Initialize(provider);
@@ -17,12 +18,20 @@ public static class DynamicDependencyInjectionExtension
         foreach (var action in _actions)
             action(provider);
         
+        await Task.WhenAll(_asyncActions.Select(x => x(provider)));
+        
         return provider;
     }
 
     public static IServiceCollection RegisterPostBuildAction(this IServiceCollection services, Action<ServiceProvider> action)
     {
         _actions.Add(action);
+        return services;
+    }
+
+    public static IServiceCollection RegisterPostBuildActionAsync(this IServiceCollection services, Func<ServiceProvider, Task> action)
+    {
+        _asyncActions.Add(action);
         return services;
     }
     

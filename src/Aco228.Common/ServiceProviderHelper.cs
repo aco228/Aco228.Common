@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+using Aco228.Common.Attributes;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Aco228.Common;
 
@@ -37,6 +39,42 @@ public static class ServiceProviderHelper
 
     public static T? GetService<T>()
         => _serviceProvider.GetService<T>() ?? default;
+
+    public static T Construct<T>()
+    {
+        var service = ActivatorUtilities.CreateInstance<T>(_serviceProvider);
+        foreach (var serviceProp in typeof(T).GetProperties())
+        {
+            var att = serviceProp.GetCustomAttribute<InjectServiceAttribute>();
+            if (att == null)
+                continue;
+            
+            var injectService = GetServiceByType(serviceProp.PropertyType);
+            if (injectService == null)
+                continue;
+            
+            serviceProp.SetValue(service, injectService);          
+        }
+        return service;
+    }
+    
+    public static object ConstructByType(Type type)
+    {
+        var service = ActivatorUtilities.CreateInstance(_serviceProvider, type);
+        foreach (var serviceProp in type.GetProperties())
+        {
+            var att = serviceProp.GetCustomAttribute<InjectServiceAttribute>();
+            if (att == null)
+                continue;
+            
+            var injectService = GetServiceByType(serviceProp.PropertyType);
+            if (injectService == null)
+                continue;
+            
+            serviceProp.SetValue(service, injectService);          
+        }
+        return service;
+    }
 
     public static T? GetScopedService<T>()
     {
