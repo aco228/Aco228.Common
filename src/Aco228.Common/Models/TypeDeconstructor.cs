@@ -32,4 +32,11 @@ public class TypeDeconstructor
         
         return new (false, isNullable, type);
     }
+
+    public string GetJsonObjectDefinition()
+    {
+        var isArray = IsList ? "array of " : "";
+        var typeName = IsClass ? "object" : Name.ToLowerInvariant();
+        return $"{isArray}{typeName}";
+    }
 }
