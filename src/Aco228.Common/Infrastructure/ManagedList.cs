@@ -1,4 +1,5 @@
-﻿using Aco228.Common.Extensions;
+﻿using System.Linq.Expressions;
+using Aco228.Common.Extensions;
 
 namespace Aco228.Common.Infrastructure;
 
@@ -30,6 +31,21 @@ public class ManagedList<T> : List<T>
 
         Remove(elem);
         return elem;
+    }
+
+    public T? TakeRandom(Func<T, bool>? filterExpression = null)
+    {
+        lock (lockObj)
+        {
+            if (Count == 0)
+                return default;
+
+            var collection = this;
+            if (filterExpression != null)
+                collection = this.Where(filterExpression).ToManagedList();
+
+            return collection.Take();
+        }
     }
 
     public T? Take()
