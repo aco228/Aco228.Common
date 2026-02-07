@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using Aco228.Common.Attributes;
+using Aco228.Common.Extensions;
+using DotNetEnv;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aco228.Common;
@@ -7,6 +9,14 @@ namespace Aco228.Common;
 public static class ServiceProviderHelper
 {
     private static IServiceProvider _serviceProvider;
+
+    public static async Task<ServiceProvider> Construct(Action<ServiceCollection> impl)
+    {
+        Env.Load();
+        var builder = new ServiceCollection();
+        impl(builder);
+        return await builder.BuildCollection();
+    }
     
     public static void Initialize(IServiceProvider provider)
     {

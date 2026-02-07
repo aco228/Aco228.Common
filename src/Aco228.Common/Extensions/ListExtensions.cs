@@ -21,8 +21,9 @@ public static class ListExtensions
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static List<T> GetAddRange<T>(this List<T> list, List<T> toBeInserted)
+    public static List<T> GetAddRange<T>(this List<T> list, List<T>? toBeInserted)
     {
+        if (toBeInserted == null) return list;
         ArgumentNullException.ThrowIfNull(list);
         var response = list.ToList();
         response.AddRange(toBeInserted);
