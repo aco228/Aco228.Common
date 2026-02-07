@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Aco228.Common.Attributes;
 using Aco228.Common.Extensions;
+using Aco228.Common.Helpers;
 using DotNetEnv;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,10 +11,14 @@ public static class ServiceProviderHelper
 {
     private static IServiceProvider _serviceProvider;
 
-    public static async Task<ServiceProvider> Construct(Action<ServiceCollection> impl)
+    public static async Task<ServiceProvider> Construct(Type caller, Action<ServiceCollection> impl)
     {
+        AssemblyFileLocator.GetAssemblyFiles(caller.Assembly);
+        
         Env.Load();
         var builder = new ServiceCollection();
+        AssemblyFileLocator.CacheAssemblyFiles(caller.Assembly);
+        builder.RegisterServicesFromAssembly(caller.Assembly);
         impl(builder);
         return await builder.BuildCollection();
     }
