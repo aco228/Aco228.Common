@@ -11,6 +11,17 @@ public static class AssemblyFileLocator
     {
         AssemblyFiles = GetAssemblyFiles(assembly).ToList();
     }
+
+    public static bool TryReadAssemblyFile(string fileName, out string? fileContent)
+    {
+        fileContent = null;
+        var file = AssemblyFiles.FirstOrDefault(x => x.Name.Contains(fileName, StringComparison.InvariantCultureIgnoreCase));
+        if (file == null)
+            return false;
+        
+        fileContent = File.ReadAllText(file.FullName);
+        return true;
+    }
     
     public static IEnumerable<FileInfo> GetAssemblyFiles(Assembly assembly)
     {
