@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
@@ -32,8 +33,26 @@ public static class TypeExtensionMethods
     public static bool IsSimple(this Type type) 
         => TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
     
-    public static bool IsClassObject(this Type type) 
-        => type.IsClass && !type.IsAbstract && type != typeof(string) && !type.IsArray && !typeof(Delegate).IsAssignableFrom(type);
+    public static bool IsClassObject(this Type type)
+    {
+        if (!type.IsClass || type.IsAbstract)
+            return false;
+
+        if (type == typeof(string))
+            return false;
+
+        if (type.IsArray)
+            return false;
+
+        if (typeof(Delegate).IsAssignableFrom(type))
+            return false;
+
+        // 👇 THIS is what you’re missing
+        if (typeof(IEnumerable).IsAssignableFrom(type))
+            return false;
+
+        return true;
+    }
        
     public static Type[] GetTypesInNamespace(this Assembly assembly, string nameSpace)
     {
