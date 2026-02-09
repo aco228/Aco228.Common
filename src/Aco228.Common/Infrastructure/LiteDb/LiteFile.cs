@@ -18,6 +18,12 @@ public class LiteFile<T> : IDisposable
 
     public LiteFile<T> LoadFile(string fileName, string folderName = "")
     {
+        if (string.IsNullOrEmpty(folderName) && typeof(LiteObject).IsAssignableFrom(typeof(T)))
+        {
+            var dummype = Activator.CreateInstance<T>() as LiteObject;
+            folderName = dummype!.FolderName;
+        }
+        
         if(!fileName.EndsWith(".lite"))
             fileName += ".lite";
         

@@ -12,7 +12,7 @@ public static class DynamicDependencyInjectionExtension
     
     public static async Task<ServiceProvider> BuildCollection(this IServiceCollection services)
     {
-        var provider =  services.BuildServiceProvider();
+        var provider = services.BuildServiceProvider();
         ServiceProviderHelper.Initialize(provider);
 
         foreach (var action in _actions)

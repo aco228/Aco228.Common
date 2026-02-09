@@ -11,7 +11,7 @@ public static class ServiceProviderHelper
 {
     private static IServiceProvider _serviceProvider;
 
-    public static async Task<ServiceProvider> Construct(Type caller, Action<ServiceCollection> impl)
+    public static async Task<IServiceProvider> Construct(Type caller, Action<ServiceCollection> impl)
     {
         AssemblyFileLocator.GetAssemblyFiles(caller.Assembly);
         
@@ -20,7 +20,8 @@ public static class ServiceProviderHelper
         AssemblyFileLocator.CacheAssemblyFiles(caller.Assembly);
         builder.RegisterServicesFromAssembly(caller.Assembly);
         impl(builder);
-        return await builder.BuildCollection();
+        var serviceProvider = await builder.BuildCollection();
+        return serviceProvider;
     }
     
     public static void Initialize(IServiceProvider provider)

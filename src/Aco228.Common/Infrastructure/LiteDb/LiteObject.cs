@@ -2,6 +2,6 @@
 
 public abstract class LiteObject
 {
-    protected virtual string FolderName { get; } = string.Empty;
-    protected virtual string FileName { get; } = string.Empty;
+    public virtual string FolderName { get; } = string.Empty;
+    public virtual string FileName { get; } = string.Empty;
 }
