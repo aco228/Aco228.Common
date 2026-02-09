@@ -87,6 +87,9 @@ public class StorageManager : IStorageManager
 
     public IStorageFolder GetFolder(string folderName, bool createIfNotExists = true)
     {
+        if(string.IsNullOrEmpty(folderName)) 
+            return GetFolder(GetDocumentsDirectoryPath());
+        
         var documentFolder = new DirectoryInfo(Path.Combine(GetDocumentsDirectoryPath(), folderName));
         if (!documentFolder.Exists)
         {
