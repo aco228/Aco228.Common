@@ -1,6 +1,8 @@
-﻿namespace Aco228.Common.LocalStorage;
+﻿using Aco228.Common.Models;
 
-public interface IStorageManager
+namespace Aco228.Common.LocalStorage;
+
+public interface IStorageManager : ISingleton
 {
     DirectoryInfo GetDocumentsDirectoryInfo();
     DirectoryInfo GetCurrentAssemblyLocation();
