@@ -7,14 +7,14 @@ namespace Aco228.Common.Extensions;
 
 public static class DynamicDependencyInjectionExtension
 {
-    private static List<Action<ServiceProvider>> _actions = new();
-    private static List<Func<ServiceProvider, Task>> _asyncActions = new();
+    private static ConcurrentList<Action<ServiceProvider>> _actions = new();
+    private static ConcurrentList<Func<ServiceProvider, Task>> _asyncActions = new();
     
     public static async Task<ServiceProvider> BuildCollection(this IServiceCollection services)
     {
         var provider = services.BuildServiceProvider();
         ServiceProviderHelper.Initialize(provider);
-
+        
         foreach (var action in _actions)
             action(provider);
         
@@ -86,7 +86,7 @@ public static class DynamicDependencyInjectionExtension
                 continue;
             }
             
-            Console.WriteLine($"Registering {inheritInterface.Name}.{assemblyTypeSignature}" + (hasInjectedServices ? " with injected services" : ""));
+            Console.WriteLine($"[{lifetime}] Registering {inheritInterface.Name}.{assemblyTypeSignature}" + (hasInjectedServices ? " with injected services" : ""));
 
             Func<IServiceProvider, object>? implementationFactory = null;
             if (hasInjectedServices)

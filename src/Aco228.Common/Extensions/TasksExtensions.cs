@@ -1,4 +1,6 @@
-﻿namespace Aco228.Common.Extensions;
+﻿using System.Threading.Channels;
+
+namespace Aco228.Common.Extensions;
 
 public static class TasksExtensions
 {

@@ -11,7 +11,7 @@ public static class ServiceProviderHelper
 {
     private static IServiceProvider _serviceProvider;
 
-    public static async Task<IServiceProvider> Construct(Type caller, Action<ServiceCollection> impl)
+    public static async Task<IServiceProvider> CreateProvider(Type caller, Action<ServiceCollection> impl)
     {
         AssemblyFileLocator.GetAssemblyFiles(caller.Assembly);
         

@@ -1,15 +1,23 @@
 ﻿using System.Reflection;
+using Aco228.Common.Extensions;
+using Aco228.Common.Models;
 
 namespace Aco228.Common.Helpers;
 
 public static class AssemblyFileLocator
 {
     private static List<string> IgnoreExtensions = new() { ".dll", ".pdb", ".env", ".exe"};
-    public static List<FileInfo> AssemblyFiles { get; private set; } = new();
+    public static ConcurrentList<FileInfo> AssemblyFiles { get; private set; } = new();
 
     public static void CacheAssemblyFiles(Assembly assembly)
     {
-        AssemblyFiles = GetAssemblyFiles(assembly).ToList();
+        AssemblyFiles = GetAssemblyFiles(assembly).ToConcurrentList();
+    }
+
+    public static bool TryFindAssemblyFile(string fileName, out FileInfo fileInfo)
+    {
+        fileInfo =  AssemblyFiles.FirstOrDefault(x => x.Name.Contains(fileName, StringComparison.InvariantCultureIgnoreCase));
+        return fileInfo != null;
     }
 
     public static bool TryReadAssemblyFile(string fileName, out string? fileContent)
