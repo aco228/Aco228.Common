@@ -35,10 +35,13 @@ public static class DateTimeExtensions
     public static long ToUnixTimestampSeconds(this DateTime dateTime)
         => new DateTimeOffset(dateTime).ToUnixTimeSeconds();
 
-    public static DateTime FromUnixTimestampMilliseconds(long timestampMs)
+    public static DateTime FromUnixTimestampMillisecondsUtc(this long timestampMs)
         => DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
 
-    public static DateTime FromUnixTimestampSeconds(long timestampSeconds)
+    public static DateTime FromUnixTimestampMilliseconds(this long timestampMs)
+        => DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).DateTime;
+
+    public static DateTime FromUnixTimestampSeconds(this long timestampSeconds)
         => DateTimeOffset.FromUnixTimeSeconds(timestampSeconds).UtcDateTime;
     
     #endregion
