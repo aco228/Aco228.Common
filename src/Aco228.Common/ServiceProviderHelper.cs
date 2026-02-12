@@ -13,17 +13,21 @@ public static class ServiceProviderHelper
 
     public static async Task<IServiceProvider> CreateProvider(Type caller, Action<ServiceCollection> impl)
     {
-        AssemblyFileLocator.GetAssemblyFiles(caller.Assembly);
-        
-        Env.Load();
         var builder = new ServiceCollection();
-        AssemblyFileLocator.CacheAssemblyFiles(caller.Assembly);
-        builder.RegisterServicesFromAssembly(caller.Assembly);
+        
+        RegisterCoreCommon(caller, builder);
         impl(builder);
         var serviceProvider = await builder.BuildCollection();
         return serviceProvider;
     }
-    
+
+    public static void RegisterCoreCommon(Type caller, IServiceCollection builder)
+    {
+        Env.Load();
+        AssemblyFileLocator.CacheAssemblyFiles(caller.Assembly);
+        builder.RegisterServicesFromAssembly(caller.Assembly);
+    }
+
     public static void Initialize(IServiceProvider provider)
     {
         _serviceProvider = provider;
