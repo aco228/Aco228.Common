@@ -7,29 +7,35 @@ namespace Aco228.Common.Extensions;
 
 public static class DynamicDependencyInjectionExtension
 {
-    private static ConcurrentList<Action<ServiceProvider>> _actions = new();
-    private static ConcurrentList<Func<ServiceProvider, Task>> _asyncActions = new();
+    private static ConcurrentList<Action<IServiceProvider>> _actions = new();
+    private static ConcurrentList<Func<IServiceProvider, Task>> _asyncActions = new();
     
     public static async Task<ServiceProvider> BuildCollection(this IServiceCollection services)
     {
         var provider = services.BuildServiceProvider();
+        await provider.InitializeAndPrepare();
+        return provider;
+    }
+
+    public static async Task InitializeAndPrepare(this IServiceProvider provider)
+    {
         ServiceProviderHelper.Initialize(provider);
         
         foreach (var action in _actions)
             action(provider);
         
         await Task.WhenAll(_asyncActions.Select(x => x(provider)));
-        
-        return provider;
+        _actions.Clear();
+        _asyncActions.Clear();
     }
 
-    public static IServiceCollection RegisterPostBuildAction(this IServiceCollection services, Action<ServiceProvider> action)
+    public static IServiceCollection RegisterPostBuildAction(this IServiceCollection services, Action<IServiceProvider> action)
     {
         _actions.Add(action);
         return services;
     }
 
-    public static IServiceCollection RegisterPostBuildActionAsync(this IServiceCollection services, Func<ServiceProvider, Task> action)
+    public static IServiceCollection RegisterPostBuildActionAsync(this IServiceCollection services, Func<IServiceProvider, Task> action)
     {
         _asyncActions.Add(action);
         return services;

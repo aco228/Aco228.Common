@@ -59,7 +59,7 @@ public static class ServiceProviderHelper
 
     public static T? GetService<T>()
         => _serviceProvider.GetService<T>() ?? default;
-
+    
     public static T Construct<T>()
     {
         var service = ActivatorUtilities.CreateInstance<T>(_serviceProvider);
@@ -77,7 +77,7 @@ public static class ServiceProviderHelper
         }
         return service;
     }
-    
+
     public static object ConstructByType(Type type)
     {
         var service = ActivatorUtilities.CreateInstance(_serviceProvider, type);
