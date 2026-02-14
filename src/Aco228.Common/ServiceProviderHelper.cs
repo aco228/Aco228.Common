@@ -60,9 +60,9 @@ public static class ServiceProviderHelper
     public static T? GetService<T>()
         => _serviceProvider.GetService<T>() ?? default;
     
-    public static T Construct<T>()
+    public static T Construct<T>(params object[] args)
     {
-        var service = ActivatorUtilities.CreateInstance<T>(_serviceProvider);
+        var service = ActivatorUtilities.CreateInstance<T>(_serviceProvider, args);
         foreach (var serviceProp in typeof(T).GetProperties())
         {
             var att = serviceProp.GetCustomAttribute<InjectServiceAttribute>();

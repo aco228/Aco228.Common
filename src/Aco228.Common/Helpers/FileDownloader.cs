@@ -1,10 +1,11 @@
 ﻿using System.Net;
 using Aco228.Common.Extensions;
 using Aco228.Common.LocalStorage;
+using Aco228.Common.Models;
 
 namespace Aco228.Common.Helpers;
 
-public class FileDownloader : IDisposable
+public class FileDownloader : IDisposable, ITransient
 {
     private readonly IStorageManager _storageManager;
     private HttpClient _httpClient;
@@ -18,6 +19,9 @@ public class FileDownloader : IDisposable
     }
 
     public HttpClient HttpClient => _httpClient;
+    
+    public static FileDownloader Get()
+        => ServiceProviderHelper.Construct<FileDownloader>();
 
     public void SetClientHeader(string headerName, string headerValue)
     {
