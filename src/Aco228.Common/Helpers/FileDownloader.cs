@@ -9,23 +9,30 @@ public class FileDownloader : IDisposable, ITransient
 {
     private readonly IStorageManager _storageManager;
     private HttpClient _httpClient;
-    private readonly IStorageFolder _tempFolder;
+    private IStorageFolder _defaultFolder;
 
     public FileDownloader (IStorageManager storageManager)
     {
         _storageManager = storageManager;
-        _httpClient = new HttpClient();
-        _tempFolder = _storageManager.GetTempFolder();
+        var httpFactory = ServiceProviderHelper.GetService<IHttpClientFactory>();
+        _httpClient = httpFactory != null ? httpFactory.CreateClient() :  new HttpClient();
+        _defaultFolder = _storageManager.GetTempFolder();
     }
 
     public HttpClient HttpClient => _httpClient;
     
     public static FileDownloader Get()
-        => ServiceProviderHelper.Construct<FileDownloader>();
+        => new (StorageManager.Instance);
 
     public void SetClientHeader(string headerName, string headerValue)
     {
         _httpClient.DefaultRequestHeaders.Add(headerName, headerValue);
+    }
+
+    public FileDownloader SetDefaultFolder(IStorageFolder folder)
+    {
+        _defaultFolder = folder;
+        return this;
     }
 
     public void SetProxy(string host, string username, string password)
@@ -62,12 +69,12 @@ public class FileDownloader : IDisposable, ITransient
             throw new ArgumentException($"Directory does not exist: {directoryLocation}");
 
         if (string.IsNullOrEmpty(directoryLocation))
-            directoryLocation = _tempFolder.GetCurrentPath();
+            directoryLocation = _defaultFolder.GetCurrentPath();
 
         // Handle local paths
         if (url.StartsWith(@"C:\") || url.StartsWith(@"C:/"))
         {
-            return _tempFolder.CopyFile(url, IdHelper.GetId("localhost_file"));
+            return _defaultFolder.CopyFile(url, IdHelper.GetId("localhost_file"));
         }
 
         if (url.StartsWith("http://localhost") || url.StartsWith("https://localhost"))
@@ -130,7 +137,7 @@ public class FileDownloader : IDisposable, ITransient
         if (storageFileInfo == null)
             throw new ArgumentException($"Could not find this file on localhost: {searchedParam}");
 
-        return _tempFolder.CopyFile(storageFileInfo, IdHelper.GetId("localhost_file"));
+        return _defaultFolder.CopyFile(storageFileInfo, IdHelper.GetId("localhost_file"));
     }
 
     public void Dispose()

@@ -103,6 +103,24 @@ public class StorageManager : IStorageManager
 
         return new StorageFolder(documentFolder);
     }
+    
+    public IStorageFolder GetFolderAs<T>(string folderName, bool createIfNotExists = true)
+        where T : IStorageFolder
+    {
+        if(string.IsNullOrEmpty(folderName)) 
+            return GetFolder(GetDocumentsDirectoryPath());
+        
+        var documentFolder = new DirectoryInfo(Path.Combine(GetDocumentsDirectoryPath(), folderName));
+        if (!documentFolder.Exists)
+        {
+            if (createIfNotExists)
+                documentFolder.Create();
+            else
+                throw new ArgumentException($"Folder name {folderName} does not exists");
+        }
+
+        return (T)Activator.CreateInstance(typeof(T), documentFolder);
+    }
 
     public FileInfo? DeepSearchFor(string fileName, DirectoryInfo? startPosition = null)
     {

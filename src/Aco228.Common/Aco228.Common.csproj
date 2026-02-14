@@ -10,6 +10,7 @@
       <PackageReference Include="DotNetEnv" Version="3.1.1" />
       <PackageReference Include="LiteDB" Version="6.0.0-prerelease.75" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
       <PackageReference Include="YamlDotNet" Version="16.3.0" />
     </ItemGroup>
