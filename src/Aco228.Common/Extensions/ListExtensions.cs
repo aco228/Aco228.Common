@@ -67,4 +67,13 @@ public static class ListExtensions
         list.AddRange(append);
         return list;
     }
+
+    public static List<TResult> GetAllListsCombined<TResult>(this IEnumerable<List<TResult>> source)
+    {
+        var result = new List<TResult>();
+        foreach (var list in source)
+            result.AddRange(list);
+
+        return result.Distinct().ToList();
+    }
 }
