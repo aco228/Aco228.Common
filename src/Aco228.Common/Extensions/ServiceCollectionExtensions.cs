@@ -44,74 +44,81 @@ public static class DynamicDependencyInjectionExtension
     
     public static void RegisterServicesFromAssembly(this IServiceCollection services, Assembly assembly)
     {
-        var assemblyTypes = assembly.GetTypes();
-        
-        foreach (var assemblyType in assemblyTypes)
+        try
         {
-            if (assemblyType.IsInterface || assemblyType.IsAbstract)
-                continue;
-            
-            if(!typeof(IBaseService).IsAssignableFrom(assemblyType))
-                continue;
+            var assemblyTypes = assembly.GetTypes();
 
-            var interfaceTypes = assemblyType.GetInterfaces();
-            var inheritInterface = interfaceTypes
-                .Where(x => typeof(IScoped).IsAssignableFrom(x) || 
-                            typeof(ITransient).IsAssignableFrom(x) || 
-                            typeof(ISingleton).IsAssignableFrom(x))
-                .OrderByDescending(x => x.GetInterfaces().Length)
-                .FirstOrDefault();
-
-            if (inheritInterface == null)
-                continue;
-
-            Dictionary<PropertyInfo, Type> injectableServices = new();
-            bool hasInjectedServices = false;
-            foreach (var propertyInfo in assemblyType.GetProperties())
+            foreach (var assemblyType in assemblyTypes)
             {
-                var injectedServiceAttribute = propertyInfo.GetCustomAttribute<InjectServiceAttribute>();
-                if (injectedServiceAttribute != null)
+                if (assemblyType.IsInterface || assemblyType.IsAbstract)
+                    continue;
+
+                if (!typeof(IBaseService).IsAssignableFrom(assemblyType))
+                    continue;
+
+                var interfaceTypes = assemblyType.GetInterfaces();
+                var inheritInterface = interfaceTypes
+                    .Where(x => typeof(IScoped).IsAssignableFrom(x) ||
+                                typeof(ITransient).IsAssignableFrom(x) ||
+                                typeof(ISingleton).IsAssignableFrom(x))
+                    .OrderByDescending(x => x.GetInterfaces().Length)
+                    .FirstOrDefault();
+
+                if (inheritInterface == null)
+                    continue;
+
+                Dictionary<PropertyInfo, Type> injectableServices = new();
+                bool hasInjectedServices = false;
+                foreach (var propertyInfo in assemblyType.GetProperties())
                 {
-                    hasInjectedServices = true;
-                    injectableServices.Add(propertyInfo, propertyInfo.PropertyType);
+                    var injectedServiceAttribute = propertyInfo.GetCustomAttribute<InjectServiceAttribute>();
+                    if (injectedServiceAttribute != null)
+                    {
+                        hasInjectedServices = true;
+                        injectableServices.Add(propertyInfo, propertyInfo.PropertyType);
+                    }
                 }
-            }
-            
-            ServiceLifetime lifetime = ServiceLifetime.Transient;
-            string assemblyTypeSignature = $"{assembly.FullName?.Split(",").First()}::{assemblyType.Name}";
 
-            if (interfaceTypes.Contains(typeof(IScoped)))
-                lifetime = ServiceLifetime.Scoped;
-            else if (interfaceTypes.Contains(typeof(ITransient)))
-                lifetime = ServiceLifetime.Transient;
-            else if (interfaceTypes.Contains(typeof(ISingleton)))
-                lifetime = ServiceLifetime.Singleton;
-            else
-            {
-                Console.WriteLine($"Could not register {assemblyTypeSignature}");
-                continue;
-            }
-            
-            Console.WriteLine($"[{lifetime}] Registering {inheritInterface.Name}.{assemblyTypeSignature}" + (hasInjectedServices ? " with injected services" : ""));
+                ServiceLifetime lifetime = ServiceLifetime.Transient;
+                string assemblyTypeSignature = $"{assembly.FullName?.Split(",").First()}::{assemblyType.Name}";
 
-            Func<IServiceProvider, object>? implementationFactory = null;
-            if (hasInjectedServices)
-                implementationFactory = (pr) =>
+                if (interfaceTypes.Contains(typeof(IScoped)))
+                    lifetime = ServiceLifetime.Scoped;
+                else if (interfaceTypes.Contains(typeof(ITransient)))
+                    lifetime = ServiceLifetime.Transient;
+                else if (interfaceTypes.Contains(typeof(ISingleton)))
+                    lifetime = ServiceLifetime.Singleton;
+                else
                 {
-                    var service = ActivatorUtilities.CreateInstance(pr, assemblyType);
-                    
-                    foreach (var (propertyInfo, type) in injectableServices)
-                        propertyInfo.SetValue(service, pr.GetService(type));
-                    
-                    return service;
-                };
-            
-            var descriptor = hasInjectedServices && implementationFactory != null
-                ? new ServiceDescriptor(inheritInterface, implementationFactory, lifetime)
-                : new ServiceDescriptor(inheritInterface, assemblyType, lifetime);
-            
-            services.Add(descriptor);
-            
+                    Console.WriteLine($"Could not register {assemblyTypeSignature}");
+                    continue;
+                }
+
+                Console.WriteLine($"[{lifetime}] Registering {inheritInterface.Name}.{assemblyTypeSignature}" +
+                                  (hasInjectedServices ? " with injected services" : ""));
+
+                Func<IServiceProvider, object>? implementationFactory = null;
+                if (hasInjectedServices)
+                    implementationFactory = (pr) =>
+                    {
+                        var service = ActivatorUtilities.CreateInstance(pr, assemblyType);
+
+                        foreach (var (propertyInfo, type) in injectableServices)
+                            propertyInfo.SetValue(service, pr.GetService(type));
+
+                        return service;
+                    };
+
+                var descriptor = hasInjectedServices && implementationFactory != null
+                    ? new ServiceDescriptor(inheritInterface, implementationFactory, lifetime)
+                    : new ServiceDescriptor(inheritInterface, assemblyType, lifetime);
+
+                services.Add(descriptor);
+            }
+        }
+        catch (Exception ex)
+        {
+            int a = 0;
         }
     }
 }
