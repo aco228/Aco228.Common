@@ -48,6 +48,9 @@ public static class AssemblyFileLocator
 
     private static IEnumerable<FileInfo> IterateDirectory(DirectoryInfo directory)
     {
+        if(directory.Name.StartsWith("."))
+            yield break;
+        
         foreach (var fileInfo in directory.GetFiles())
             if(!IgnoreExtensions.Contains(fileInfo.Extension.ToLowerInvariant()))
                 yield return fileInfo;
