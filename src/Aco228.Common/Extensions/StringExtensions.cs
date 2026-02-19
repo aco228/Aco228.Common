@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using MongoDB.Bson;
 
 namespace Aco228.Common.Extensions;
 
@@ -81,6 +82,7 @@ public static class StringExtensions
     }
     
     public static string AddAtEnd(this string input, string toAdd) => input + toAdd;
+    public static string AddAtEnd(this string input, ObjectId toAdd) => input + toAdd.ToString();
     
     public static string ToPascalCase(this string name)
     {
