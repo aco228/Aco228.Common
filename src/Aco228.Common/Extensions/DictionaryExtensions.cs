@@ -1,4 +1,6 @@
-﻿namespace Aco228.Common.Extensions;
+﻿using System.Collections.Concurrent;
+
+namespace Aco228.Common.Extensions;
 
 public static class DictionaryExtensions
 {
@@ -16,5 +18,33 @@ public static class DictionaryExtensions
             dictionary[key] = value;
         else
             dictionary.Add(key, value);
+    }
+    
+    public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
+    {
+        if (dictionary.ContainsKey(key))
+            dictionary[key] = value;
+        else
+            dictionary.Add(key, value);
+    }
+    
+    public static void AddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+    {
+        if (dictionary.ContainsKey(key))
+            dictionary[key] = value;
+        else
+            dictionary.TryAdd(key, value);
+    }
+
+    public static void WaitRemove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key)
+    {
+        var starTime = DateTime.Now;
+        while (dictionary.ContainsKey(key))
+        {
+            if (starTime.GetMinutesDifference() > 5)
+                return; 
+            
+            dictionary.TryRemove(key, out _);
+        }
     }
 }
