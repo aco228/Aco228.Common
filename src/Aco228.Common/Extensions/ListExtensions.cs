@@ -64,6 +64,9 @@ public static class ListExtensions
 
     public static List<T> AppendList<T>(this List<T> list, IEnumerable<T> append)
     {
+        if (append == null || !append.Any())
+            return list;
+        
         list.AddRange(append);
         return list;
     }
