@@ -22,6 +22,13 @@ public static class StringExtensions
             hash.Append(theByte.ToString("x2"));
         return hash.ToString();
     }
+    
+    public static bool IsValidUrl(this string url)
+    {
+        return Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
+               && (uriResult.Scheme == Uri.UriSchemeHttp 
+                   || uriResult.Scheme == Uri.UriSchemeHttps);
+    }
 
     public static string GetStringBetweenCharacters(this string input, char startChar, char endChar, bool onFirstEncounter = false)
     {
