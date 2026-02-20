@@ -88,8 +88,8 @@ public static class StringExtensions
         return char.ToLowerInvariant(name[0]) + name.Substring(1);
     }
     
-    public static string AddAtEnd(this string input, string toAdd) => input + toAdd;
-    public static string AddAtEnd(this string input, ObjectId toAdd) => input + toAdd.ToString();
+    public static string AddAtEnd(this string input, string? toAdd) => string.IsNullOrEmpty(toAdd) ? input :  input + toAdd;
+    public static string AddAtEnd(this string input, ObjectId? toAdd) => toAdd == null ? input :  input + toAdd.ToString();
     
     public static string ToPascalCase(this string name)
     {
