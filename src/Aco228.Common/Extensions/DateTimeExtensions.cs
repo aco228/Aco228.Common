@@ -35,10 +35,10 @@ public static class DateTimeExtensions
     public static long ToUnixTimestampSeconds(this DateTime dateTime)
         => new DateTimeOffset(dateTime).ToUnixTimeSeconds();
 
-    public static DateTime FromUnixTimestampMillisecondsUtc(this long timestampMs)
+    public static DateTime ToDateTimeUtc(this long timestampMs)
         => DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
 
-    public static DateTime FromUnixTimestampMilliseconds(this long timestampMs)
+    public static DateTime ToDateTime(this long timestampMs)
         => DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).DateTime;
 
     public static DateTime FromUnixTimestampSeconds(this long timestampSeconds)
@@ -98,7 +98,7 @@ public static class DateTimeExtensions
 
     // Unix timestamp extension
     public static double GetDifference(this long timestampMs, TimeUnit unit, bool utc = false)
-        => GetTimeDifference(FromUnixTimestampMilliseconds(timestampMs), 
+        => GetTimeDifference(ToDateTime(timestampMs), 
                             utc ? DateTime.UtcNow : DateTime.Now, unit);
 
     // Convenience methods for DateTime
