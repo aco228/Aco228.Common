@@ -24,6 +24,12 @@ public class FileDownloader : IDisposable, ITransient
     public static FileDownloader Get()
         => new (StorageManager.Instance);
 
+    public FileDownloader SetClient(HttpClient client)
+    {
+        _httpClient = client;
+        return this;
+    }
+
     public void SetClientHeader(string headerName, string headerValue)
     {
         _httpClient.DefaultRequestHeaders.Add(headerName, headerValue);
