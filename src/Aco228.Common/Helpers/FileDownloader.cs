@@ -10,6 +10,21 @@ public class FileDownloader : IDisposable, ITransient
     private readonly IStorageManager _storageManager;
     private HttpClient _httpClient;
     private IStorageFolder _defaultFolder;
+    
+    private static readonly Dictionary<string, string> _mediaTypeExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["image/jpeg"]  = ".jpg",
+        ["image/png"]   = ".png",
+        ["image/webp"]  = ".webp",
+        ["image/gif"]   = ".gif",
+        ["image/bmp"]   = ".bmp",
+        ["image/tiff"]  = ".tiff",
+        ["image/avif"]  = ".avif",
+        ["image/svg+xml"] = ".svg",
+        ["application/pdf"] = ".pdf",
+        ["video/mp4"]   = ".mp4",
+        ["video/webm"]  = ".webm",
+    };
 
     public FileDownloader (IStorageManager storageManager)
     {
@@ -61,15 +76,15 @@ public class FileDownloader : IDisposable, ITransient
 
     public async Task<FileInfo> DownloadFileInfo(string url, string directoryLocation = "", string fileName = "")
     {
-        var targetFileName = StringUrlHelper.GetFileName(url);
-        var extension = Path.GetExtension(targetFileName);
+        // Handle local paths
+        if (url.StartsWith(@"C:\") || url.StartsWith(@"C:/"))
+            return _defaultFolder.CopyFile(url, IdHelper.GetId("localhost_file"));
 
-        if (string.IsNullOrEmpty(fileName))
-            fileName = targetFileName;
+        if (url.StartsWith("http://localhost") || url.StartsWith("https://localhost"))
+            return ReadFromLocalhost(url);
 
-        // Ensure file has proper extension
-        if (!fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
-            fileName += extension;
+        if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+            return ReadFromLocalhost(url);
 
         if (!string.IsNullOrEmpty(directoryLocation) && !Directory.Exists(directoryLocation))
             throw new ArgumentException($"Directory does not exist: {directoryLocation}");
@@ -77,44 +92,49 @@ public class FileDownloader : IDisposable, ITransient
         if (string.IsNullOrEmpty(directoryLocation))
             directoryLocation = _defaultFolder.GetCurrentPath();
 
-        // Handle local paths
-        if (url.StartsWith(@"C:\") || url.StartsWith(@"C:/"))
-        {
-            return _defaultFolder.CopyFile(url, IdHelper.GetId("localhost_file"));
-        }
-
-        if (url.StartsWith("http://localhost") || url.StartsWith("https://localhost"))
-        {
-            return ReadFromLocalhost(url);
-        }
-
-        if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-        {
-            return ReadFromLocalhost(url);
-        }
-
         // --- Download file from internet ---
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
 
-        var fileLocation = Path.Combine(directoryLocation, fileName);
+        // 1. Try Content-Disposition filename
+        if (string.IsNullOrEmpty(fileName))
+        {
+            var cd = response.Content.Headers.ContentDisposition;
+            if (cd?.FileNameStar != null)
+                fileName = cd.FileNameStar;
+            else if (cd?.FileName != null)
+                fileName = cd.FileName.Trim('"');
+        }
 
-        // Ensure extension from content type if missing
-        if (string.IsNullOrEmpty(Path.GetExtension(fileLocation)))
+        // 2. Fall back to URL filename
+        if (string.IsNullOrEmpty(fileName))
+            fileName = StringUrlHelper.GetFileName(url);
+
+        // 3. Resolve extension - try URL/filename first, then Content-Type
+        var extension = Path.GetExtension(fileName);
+
+        if (string.IsNullOrEmpty(extension))
         {
             var mediaType = response.Content.Headers.ContentType?.MediaType;
-            if (mediaType == "image/jpeg") fileLocation += ".jpg";
+            if (mediaType != null && _mediaTypeExtensions.TryGetValue(mediaType, out var detectedExt))
+            {
+                extension = detectedExt;
+                fileName += extension;
+            }
         }
 
-        // Generate unique name if file already exists
-        if (File.Exists(fileLocation))
-        {
-            var uniqueName = IdHelper.GetId("dwn") + "_" + fileName;
-            fileLocation = Path.Combine(directoryLocation, uniqueName);
-        }
+        // Ensure fileName has the resolved extension
+        if (!string.IsNullOrEmpty(extension) && !fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+            fileName += extension;
 
-        // Write to a temp file first
+        // 4. If we still have no usable fileName, generate one
+        if (string.IsNullOrEmpty(fileName))
+            fileName = IdHelper.GetId("dwn") + (extension ?? string.Empty);
+
+        var fileLocation = Path.Combine(directoryLocation, IdHelper.GetId("dwn") + "_" + fileName);
+
+        // Write to a temp file first, then atomically move into place
         var tempFile = Path.Combine(directoryLocation, Path.GetRandomFileName());
 
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
@@ -123,7 +143,6 @@ public class FileDownloader : IDisposable, ITransient
             await responseStream.CopyToAsync(fileStream);
         }
 
-        // Atomically move into place
         File.Move(tempFile, fileLocation, overwrite: true);
 
         var fileInfo = new FileInfo(fileLocation);
