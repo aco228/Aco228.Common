@@ -74,7 +74,11 @@ public class FileDownloader : IDisposable, ITransient
         // _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
     }
 
-    public async Task<FileInfo> DownloadFileInfo(string url, string directoryLocation = "", string fileName = "")
+    public async Task<FileInfo> DownloadFileInfo(
+        string url, 
+        string directoryLocation = "", 
+        string fileName = "",
+        bool rename = true)
     {
         // Handle local paths
         if (url.StartsWith(@"C:\") || url.StartsWith(@"C:/"))
@@ -132,7 +136,9 @@ public class FileDownloader : IDisposable, ITransient
         if (string.IsNullOrEmpty(fileName))
             fileName = IdHelper.GetId("dwn") + (extension ?? string.Empty);
 
-        var fileLocation = Path.Combine(directoryLocation, IdHelper.GetId("dwn") + "_" + fileName);
+        var fileLocation = rename
+            ? Path.Combine(directoryLocation, IdHelper.GetId("dwn") + "_" + fileName)
+            : Path.Combine(directoryLocation, fileName);
 
         // Write to a temp file first, then atomically move into place
         var tempFile = Path.Combine(directoryLocation, Path.GetRandomFileName());
