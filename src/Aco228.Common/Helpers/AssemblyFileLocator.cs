@@ -20,6 +20,14 @@ public static class AssemblyFileLocator
         return fileInfo != null;
     }
 
+    public static string ReadAssemblyFile(string fileName)
+    {
+        if (TryReadAssemblyFile(fileName, out var content))
+            return content;
+        
+        throw new FileNotFoundException($"File {fileName} not found in assembly");
+    }
+
     public static bool TryReadAssemblyFile(string fileName, out string? fileContent)
     {
         fileContent = null;
