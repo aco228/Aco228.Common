@@ -71,6 +71,21 @@ public static class ListExtensions
         return list;
     }
 
+    public static TResult? TryGetElementAt<TResult>(this IList<TResult> source, int index)
+    {
+        try
+        {
+            if (index >= source.Count - 1)
+                return default;
+            
+            return source.ElementAt(index);
+        }
+        catch
+        {
+            return default;
+        }
+    }
+
     public static List<TResult> GetAllListsCombined<TResult>(this IEnumerable<List<TResult>> source)
     {
         var result = new List<TResult>();
