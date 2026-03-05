@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Aco228.Common.Attributes;
+using Aco228.Common.Infrastructure;
 using Aco228.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,11 +21,15 @@ public static class DynamicDependencyInjectionExtension
     public static async Task InitializeAndPrepare(this IServiceProvider provider)
     {
         ServiceProviderHelper.Initialize(provider);
+        CoreStateMachine stateMachine = new CoreStateMachine().SetLimit(25);
         
         foreach (var action in _actions)
-            action(provider);
-        
-        await Task.WhenAll(_asyncActions.Select(x => x(provider)));
+            stateMachine.Schedule(async () => action(provider));
+
+        foreach (var action in _asyncActions)
+            stateMachine.Schedule(async () => await action(provider));
+
+        await stateMachine.Wait();
         _actions.Clear();
         _asyncActions.Clear();
     }
