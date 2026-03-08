@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Aco228.Common.Extensions;
+﻿using Aco228.Common.Extensions;
 
 namespace Aco228.Common.Infrastructure;
 
@@ -8,15 +7,15 @@ public class ManagedList<T> : List<T>
     private object lockObj = new();
     private int _currentIndex = 0;
 
-    public ManagedList () { }
-    
-    public ManagedList (List<T> input)
+    public ManagedList() { }
+
+    public ManagedList(List<T> input)
     {
         AddRange(input.Shuffle());
         _currentIndex = 0;
     }
 
-    public ManagedList<T>  ShuffleAgain()
+    public ManagedList<T> ShuffleAgain()
     {
         this.Shuffle();
         _currentIndex = 0;
@@ -25,12 +24,19 @@ public class ManagedList<T> : List<T>
 
     public T? TakeAndRemove()
     {
-        var elem = Take();
-        if (elem == null)
-            return default;
+        lock (lockObj)
+        {
+            if (Count == 0)
+                return default;
 
-        Remove(elem);
-        return elem;
+            if (_currentIndex >= Count)
+                _currentIndex = 0;
+
+            T result = this[_currentIndex];
+            RemoveAt(_currentIndex);
+            // don't increment — next element shifted into current index
+            return result;
+        }
     }
 
     public T? TakeRandom(Func<T, bool>? filterExpression = null)
@@ -60,34 +66,41 @@ public class ManagedList<T> : List<T>
 
             T? result = this.ElementAt(_currentIndex);
             _currentIndex++;
-            
-            return result;   
+
+            return result;
         }
     }
 
     public ManagedList<T> TakeNum(int number, bool remove = false)
     {
         var result = new ManagedList<T>();
-        var limit = number >= Count ? Count : number;
+        var limit = Math.Min(number, Count);
         for (int i = 0; i < limit; i++)
         {
             var elem = Take();
             if (elem == null)
                 continue;
-            
+
             result.Add(elem);
             if (remove)
-                Remove(elem);
+            {
+                var idx = IndexOf(elem);
+                if (idx >= 0)
+                {
+                    RemoveAt(idx);
+                    if (idx < _currentIndex)
+                        _currentIndex--; // compensate for shifted index
+                }
+            }
         }
         return result;
     }
 
     public void Reset()
     {
-        var resufle = this.Shuffle().ToList();
+        var reshuffled = this.Shuffle().ToList();
         Clear();
-        AddRange(resufle);
+        AddRange(reshuffled);
         _currentIndex = 0;
     }
-    
 }

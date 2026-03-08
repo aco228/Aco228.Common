@@ -13,6 +13,12 @@ public static class FloatHelper
         return (maxValue * sample) + (minValue * (1f - sample));
     }
 
+    public static T RandomChance<T>(params Func<T>[] choices)
+    {
+        var num = Random(0, choices.Length);
+        return choices[(int)num]();
+    }
+
     public static float Multiply(this float input, float multiply)
         => input * multiply;
 }
