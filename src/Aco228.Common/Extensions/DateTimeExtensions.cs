@@ -233,6 +233,14 @@ public static class DateTimeExtensions
     };
     
     #endregion
+
+    public static (DateTime Date, string Key, long Unix) ConvertToKey(this DateTime dateTime)
+    {
+        var date = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
+        var unix = new DateTimeOffset(date, TimeSpan.Zero).ToUnixTimeSeconds();;
+        var key = date.ToString("yyyy-MM-dd");
+        return (date, key, unix);
+    }
 }
 
 public enum TimeUnit

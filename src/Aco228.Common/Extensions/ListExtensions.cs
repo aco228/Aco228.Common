@@ -86,7 +86,7 @@ public static class ListExtensions
         }
     }
 
-    public static List<TResult> GetAllListsCombined<TResult>(this IEnumerable<List<TResult>> source)
+    public static List<TResult> GetAllListsCombined<TResult>(this IEnumerable<IEnumerable<TResult>> source)
     {
         var result = new List<TResult>();
         foreach (var list in source)
