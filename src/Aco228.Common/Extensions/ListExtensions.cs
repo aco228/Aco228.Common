@@ -30,6 +30,18 @@ public static class ListExtensions
         return response;
     }
     
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static HashSet<T> GetAddRange<T>(this HashSet<T> list, IEnumerable<T>? toBeInserted)
+    {
+        if (toBeInserted == null) return list;
+        ArgumentNullException.ThrowIfNull(list);
+        foreach (var entry in toBeInserted)
+            list.Add(entry);
+        
+        return list;
+    }
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IList<T> Shuffle<T>(this IList<T> list)
     {
