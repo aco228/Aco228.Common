@@ -11,6 +11,23 @@ public static class ServiceProviderHelper
 {
     private static IServiceProvider _serviceProvider;
 
+    public static IServiceProvider GetProvider()
+        => _serviceProvider;
+
+    public static IEnumerable<ServiceDescriptor> GetRegisteredServices()
+    {
+        var callSiteFactory = typeof(ServiceProvider)
+            .GetProperty("CallSiteFactory", BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetValue(_serviceProvider);
+
+        var descriptors = callSiteFactory
+            .GetType()
+            .GetField("_descriptors", BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetValue(callSiteFactory) as ServiceDescriptor[];
+
+        return descriptors ?? Enumerable.Empty<ServiceDescriptor>();
+    }
+    
     public static async Task<IServiceProvider> CreateProvider(Type caller, Action<ServiceCollection> impl)
     {
         var builder = new ServiceCollection();
