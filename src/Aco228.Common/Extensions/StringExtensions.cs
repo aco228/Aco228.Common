@@ -98,12 +98,4 @@ public static class StringExtensions
         if (string.IsNullOrEmpty(name) || char.IsUpper(name[0])) return name;
         return char.ToUpperInvariant(name[0]) + name.Substring(1);
     }
-    
-    public static string ToDoubleString(this int input, string extension = "")
-        => input < 10 ? $"0{input}{extension}" :  $"{input}{extension}";
-    
-    public static string ToDoubleString(this double input, string extension = "")
-        => double.IsNaN(input) || double.IsInfinity(input) 
-            ? "0" + extension 
-            : (int)input == input ? ((int)input).ToString() + extension : $"{input:0.00}" + extension;
 }
