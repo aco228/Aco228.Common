@@ -21,6 +21,10 @@ public static class DoubleHelper
         var result = double.TryParse(input, out var res) ? res : defaultValue;
         if (result == 0)
             return defaultValue;
+
+        if (result < defaultValue)
+            return defaultValue;
+        
         return result;
     }
 
@@ -29,6 +33,10 @@ public static class DoubleHelper
         var result = int.TryParse(input, out var res) ? res : defaultValue;
         if (result == 0)
             return defaultValue;
+
+        if (result < defaultValue)
+            return defaultValue;
+        
         return result;
     }
     
