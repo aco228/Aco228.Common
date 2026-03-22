@@ -81,15 +81,11 @@ public static class TypeExtensionMethods
         }
     }
     
-    [Obsolete("Obsolete")]
+    
     public static T DeepClone<T>(this T obj)
     {
-        using var ms = new MemoryStream();
-        var formatter = new BinaryFormatter();
-        formatter.Serialize(ms, obj);
-        ms.Position = 0;
-
-        return (T) formatter.Deserialize(ms);
+        var json = JsonConvert.SerializeObject(obj);
+        return JsonConvert.DeserializeObject<T>(json)!;
     }
     
     private static readonly NullabilityInfoContext _context = new();
