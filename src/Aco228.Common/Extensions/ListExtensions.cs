@@ -12,6 +12,19 @@ public static class ListExtensions
         foreach (var element in list.Where(predicate).ToList())
             list.Remove(element);
     }
+
+    public static List<T> PickWithAny<T>(params List<T>?[] lists)
+    {
+        foreach (var list in lists)
+        {
+            if (list == null || !list.Any())
+                continue;
+
+            return list;
+        }
+
+        return new List<T>();
+    }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RemoveOne<T>(this ConcurrentList<T> list, Func<T, bool> predicate)
