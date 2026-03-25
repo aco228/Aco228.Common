@@ -6,6 +6,13 @@ public static class DoubleHelper
     {
         return firstValue - secondValue;
     }
+
+    public static double Between(this double value, double min, double max)
+    {
+        if (value < min) value = min;
+        if(value > max) value = max;
+        return value;
+    }
     
     public static double Normalize(params double?[] ratios)
     {
