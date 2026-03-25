@@ -7,6 +7,12 @@ public static class DoubleHelper
         return firstValue - secondValue;
     }
     
+    public static double Normalize(params double?[] ratios)
+    {
+        var enumerator = ratios.Where(x => x.HasValue  && !double.IsNaN(x.Value));
+        return enumerator.Sum(x => x.Value) / enumerator.Count() * 1.0;
+    }
+    
     public static double Random(double minValue, double maxValue)
     {
         double sample = new Random().NextDouble();
