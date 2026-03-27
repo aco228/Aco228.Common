@@ -6,6 +6,9 @@ public static class DoubleHelper
     {
         return firstValue - secondValue;
     }
+    
+    public static double SanitizeDouble(this double value) =>
+        double.IsFinite(value) ? value : 0;
 
     public static double Between(this double value, double min, double max)
     {
