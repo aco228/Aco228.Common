@@ -98,4 +98,18 @@ public static class StringExtensions
         if (string.IsNullOrEmpty(name) || char.IsUpper(name[0])) return name;
         return char.ToUpperInvariant(name[0]) + name.Substring(1);
     }
+
+    public static int TryParseToInt(this string input, int defVal = 0)
+    {
+        if (int.TryParse(input, out var res))
+            return res;
+        return defVal;
+    }
+    
+    public static double TryParseToDouble(this string input, double defVal = 0)
+    {
+        if (double.TryParse(input, out var res))
+            return res;
+        return defVal;
+    }
 }
