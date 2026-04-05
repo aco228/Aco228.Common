@@ -7,8 +7,11 @@ public static class DoubleHelper
         return firstValue - secondValue;
     }
     
+    public static double Round(this double value)
+        => Math.Round(value, 2);
+    
     public static double SanitizeDouble(this double value) =>
-        double.IsFinite(value) ? value : 0;
+        double.IsFinite(value) ? value.Round() : 0;
 
     public static double Between(this double value, double min, double max)
     {
