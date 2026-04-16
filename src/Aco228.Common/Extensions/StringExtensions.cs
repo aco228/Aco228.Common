@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using MongoDB.Bson;
 
 namespace Aco228.Common.Extensions;
@@ -108,7 +109,7 @@ public static class StringExtensions
     
     public static double TryParseToDouble(this string input, double defVal = 0)
     {
-        if (double.TryParse(input, out var res))
+        if (double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var res))
             return res;
         return defVal;
     }
