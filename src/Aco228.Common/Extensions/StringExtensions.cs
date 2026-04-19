@@ -30,6 +30,38 @@ public static class StringExtensions
                && (uriResult.Scheme == Uri.UriSchemeHttp 
                    || uriResult.Scheme == Uri.UriSchemeHttps);
     }
+    
+    public static string RemoveEmojisAndSymbols(this string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        var sb = new StringBuilder();
+        foreach (var rune in input.EnumerateRunes())
+        {
+            var category = CharUnicodeInfo.GetUnicodeCategory(rune.Value);
+
+            if (rune.Value <= 0x007F) { sb.Append(rune); continue; } // standard ASCII - always keep
+
+            // keep standard letters and numbers from any language (Cyrillic, Arabic, etc.)
+            if (category == UnicodeCategory.LowercaseLetter   ||
+                category == UnicodeCategory.UppercaseLetter   ||
+                category == UnicodeCategory.TitlecaseLetter   ||
+                category == UnicodeCategory.OtherLetter       ||
+                category == UnicodeCategory.DecimalDigitNumber) { sb.Append(rune); continue; }
+
+            // keep basic punctuation
+            if (category == UnicodeCategory.SpaceSeparator    ||
+                category == UnicodeCategory.DashPunctuation   ||
+                category == UnicodeCategory.OtherPunctuation  ||
+                category == UnicodeCategory.OpenPunctuation   ||
+                category == UnicodeCategory.ClosePunctuation  ||
+                category == UnicodeCategory.ConnectorPunctuation) { sb.Append(rune); continue; }
+
+            // everything else (emojis, symbols, pictographs, etc.) — drop
+        }
+
+        return sb.ToString().Trim();
+    }
 
     public static string GetStringBetweenCharacters(this string input, char startChar, char endChar, bool onFirstEncounter = false)
     {
