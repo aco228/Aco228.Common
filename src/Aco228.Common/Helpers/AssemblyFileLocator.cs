@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Aco228.Common.Extensions;
 using Aco228.Common.Models;
+using Newtonsoft.Json;
 
 namespace Aco228.Common.Helpers;
 
@@ -18,6 +19,12 @@ public static class AssemblyFileLocator
     {
         fileInfo =  AssemblyFiles.FirstOrDefault(x => x.Name.Contains(fileName, StringComparison.InvariantCultureIgnoreCase));
         return fileInfo != null;
+    }
+
+    public static T? ReadAssemblyJson<T>(string fileName)
+    {
+        string raw = ReadAssemblyFile(fileName);
+        return JsonConvert.DeserializeObject<T>(raw);
     }
 
     public static string ReadAssemblyFile(string fileName)
