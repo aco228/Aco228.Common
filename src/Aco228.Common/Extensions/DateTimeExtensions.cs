@@ -37,6 +37,9 @@ public static class DateTimeExtensions
 
     public static DateTime ToDateTimeUtc(this long timestampMs)
         => DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
+    
+    public static DateTime? ToDateTimeUtc(this long? timestampMs)
+        => timestampMs == null ? null : DateTimeOffset.FromUnixTimeMilliseconds(timestampMs.Value).UtcDateTime;
 
     public static DateTime ToDateTimeSecondsUtc(this long timestampMs)
         => DateTimeOffset.FromUnixTimeSeconds(timestampMs).UtcDateTime;
