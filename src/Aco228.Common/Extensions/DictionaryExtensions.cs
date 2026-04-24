@@ -11,6 +11,14 @@ public static class DictionaryExtensions
 
         return default;
     }
+
+    public static void AddToKeyDictionary<TValue>(this ConcurrentDictionary<string, List<TValue>> input, string key, TValue entry)
+    {
+        if(!input.ContainsKey(key))
+            input.TryAdd(key, new List<TValue>());
+        
+        input[key].Add(entry);
+    }
     
     public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
     {
