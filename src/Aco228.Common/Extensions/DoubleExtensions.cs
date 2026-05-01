@@ -7,6 +7,9 @@ public static class DoubleExtensions
     
     public static string ToDoubleString(this int input, string extension = "")
         => input < 10 ? $"0{input}{extension}" :  $"{input}{extension}";
+
+    public static string ToDoubleString(this double? input, string extension = "")
+        => input.HasValue == false ? string.Empty : input.Value.ToDoubleString();
     
     public static string ToDoubleString(this double input, string extension = "")
         => double.IsNaN(input) || double.IsInfinity(input) 

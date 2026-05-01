@@ -145,4 +145,11 @@ public static class StringExtensions
             return res;
         return defVal;
     }
+    
+    public static double? TryParseToDoubleNull(this string input)
+    {
+        if (double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var res))
+            return res;
+        return null;
+    }
 }

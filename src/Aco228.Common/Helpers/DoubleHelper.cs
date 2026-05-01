@@ -13,6 +13,9 @@ public static class DoubleHelper
     public static double SanitizeDouble(this double value) =>
         double.IsFinite(value) ? value.Round() : 0;
 
+    public static double? SanitizeDoubleNull(this double? value) =>
+        value.HasValue == false ? null : value.Value.SanitizeDouble();
+
     public static double Between(this double value, double min, double max)
     {
         if (value < min) value = min;
