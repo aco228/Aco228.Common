@@ -13,6 +13,14 @@ public static class ListExtensions
             list.Remove(element);
     }
 
+    public static void AddIfNotNull<T>(this List<T> list, T? element)
+    {
+        if(element == null)
+            return;
+        
+        list.Add(element);
+    }
+
     public static List<T> PickWithAny<T>(params List<T>?[] lists)
     {
         foreach (var list in lists)
