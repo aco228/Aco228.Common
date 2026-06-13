@@ -1,4 +1,6 @@
-﻿namespace Aco228.Common.Helpers;
+﻿using MongoDB.Bson;
+
+namespace Aco228.Common.Helpers;
 
 public static class RandomHelper
 {
