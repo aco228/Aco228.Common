@@ -76,6 +76,18 @@ public static class ServiceProviderHelper
 
     public static T? GetService<T>()
         => _serviceProvider.GetService<T>() ?? default;
+
+    public static T? TryConstruct<T>(params object[] args)
+    {
+        try
+        {
+            return Construct<T>(args);
+        }
+        catch
+        {
+            return default;
+        }
+    }
     
     public static T Construct<T>(params object[] args)
     {
