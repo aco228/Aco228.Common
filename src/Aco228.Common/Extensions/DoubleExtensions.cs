@@ -20,4 +20,14 @@ public static class DoubleExtensions
         => double.IsNaN(input) || double.IsInfinity(input) 
             ? "0" + extension 
             : ((int)Math.Floor(input)).ToString() + extension;
+
+    public static int DoubleToIntFloor(this double input)
+        => input == 0 || double.IsNaN(input) || double.IsInfinity(input)
+            ? 0
+            : (int) Math.Floor(input);
+
+    public static int DoubleToIntCeil(this double input)
+        => input == 0 || double.IsNaN(input) || double.IsInfinity(input)
+            ? 0
+            : (int) Math.Ceiling(input);
 }
