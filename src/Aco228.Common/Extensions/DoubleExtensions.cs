@@ -15,4 +15,9 @@ public static class DoubleExtensions
         => double.IsNaN(input) || double.IsInfinity(input) 
             ? "0" + extension 
             : (int)input == input ? ((int)input).ToString() + extension : $"{input:0.00}" + extension;
+    
+    public static string ToDoubleStringNoTrail(this double input, string extension = "")
+        => double.IsNaN(input) || double.IsInfinity(input) 
+            ? "0" + extension 
+            : ((int)Math.Floor(input)).ToString() + extension;
 }
