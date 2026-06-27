@@ -152,4 +152,20 @@ public static class StringExtensions
             return res;
         return null;
     }
+    
+    
+    public static string FitStringInLength(string input, int maximumLength, int padding = 2, bool fitLeft = false)
+    {
+        if (string.IsNullOrEmpty(input))
+            return new string(' ', maximumLength);
+
+        string padded = $"{new string(' ', padding)}{input}{new string(' ', padding)}";
+
+        if (padded.Length >= maximumLength)
+            return padded;
+
+        return fitLeft
+            ? padded.PadRight(maximumLength)
+            : padded.PadLeft(maximumLength);
+    }
 }
