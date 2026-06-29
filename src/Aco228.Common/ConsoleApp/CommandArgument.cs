@@ -1,4 +1,5 @@
-﻿using Aco228.Common.Extensions;
+﻿using System.Reflection.Emit;
+using Aco228.Common.Extensions;
 using Newtonsoft.Json;
 
 namespace Aco228.Common.ConsoleApp;
@@ -10,7 +11,7 @@ public class CArgument : Attribute
     public bool Required { get; set; } = false;
 }
 
-public class CommandArgument
+public abstract class CommandArgument
 {
     private HashSet<string> _missingParameters = new();
     
@@ -65,6 +66,8 @@ public class CommandArgument
                 _missingParameters.Add(requiredParams.Attribute.Name);
     }
 
+    public abstract Task<bool> ShouldContinueAfterArguments();
+
     public bool IsValid(out int returnInt)
     {
         returnInt = 0;
@@ -82,7 +85,7 @@ public class CommandArgument
         return false;
     }
 
-    private void PrintErrorMessage()
+    internal void PrintErrorMessage()
     {
         Console.WriteLine(Console.Title);
         Console.WriteLine("=============================================");
@@ -94,7 +97,7 @@ public class CommandArgument
         Environment.ExitCode = -1;
     }
     
-    private void PrintHelp()
+    internal void PrintHelp()
     {
         Console.WriteLine(Console.Title);
         Console.WriteLine("=============================================");
