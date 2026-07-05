@@ -21,6 +21,15 @@ public static class ListExtensions
         list.Add(element);
     }
 
+    public static List<T>? ToListOrNull<T>(this IEnumerable<T>? elements)
+    {
+        if (elements == null || elements.Any() == false)
+            return null;
+        
+        return elements.ToList();
+    }
+        
+
     public static List<T> PickWithAny<T>(params List<T>?[] lists)
     {
         foreach (var list in lists)
