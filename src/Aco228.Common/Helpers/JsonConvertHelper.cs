@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Aco228.Common.Helpers.Json;
+using Newtonsoft.Json;
 
 namespace Aco228.Common.Helpers;
 
@@ -10,19 +11,42 @@ public static class JsonConvertHelper
         output = default;
         if (!File.Exists(filePath))
             return false;
+
+        string? content;
+        try
+        {
+            content = File.ReadAllText(filePath);
+            if (string.IsNullOrEmpty(content))
+                return false;
+        }
+        catch
+        {
+            return false;
+        }
         
-        var content = File.ReadAllText(filePath);
         return TrySerialize(content, out output);
     }
     
     
     public static bool TrySerialize<T>(string input, out T output)  
     {
-        output = default;
-        if (string.IsNullOrEmpty(input))
-            return false;
+        try
+        {
+            output = default;
+            if (string.IsNullOrEmpty(input))
+                return false;
 
-        output = JsonConvert.DeserializeObject<T>(input);
-        return output != null;
+            var settings = new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter> { new ObjectIdJsonConverter() }
+            };
+            output = JsonConvert.DeserializeObject<T>(input, settings);
+            return output != null;
+        }
+        catch
+        {
+            output = default;
+            return false;
+        }
     }
 }
