@@ -6,6 +6,14 @@ namespace Aco228.Common.Extensions;
 
 public static class StringExtensions
 {
+    public static bool EqualsOrNull(this string? input, string other, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    {
+        if (string.IsNullOrEmpty(input))
+            return false;
+
+        return input.Equals(other, comparison);
+    }
+    
     public static string Remove(this string input, string toRemove)
     {
         if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(toRemove))
