@@ -12,7 +12,18 @@ public class TimedObject<T>
         return Data;
     }
 
-    public T? TryGet()
+    public bool IsNotValid()
+    {
+        return (Data == null || ValidUntil == null || ValidUntil < DateTime.UtcNow);
+    }
+
+    public bool TryGet(out T value)
+    {
+        value = Get();
+        return value != null;
+    }
+
+    public T? Get()
     {
         if (Data == null || ValidUntil == null || ValidUntil < DateTime.UtcNow)
             return default;
