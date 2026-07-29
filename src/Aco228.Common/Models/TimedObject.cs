@@ -2,32 +2,31 @@
 
 public class TimedObject<T>
 {
+    private bool _hasValue;
     public T? Data { get; private set; }
-    public DateTime? ValidUntil { get; private set; } = null;
+    public DateTime? ValidUntil { get; private set; }
 
     public T AddOrUpdate(T entry, DateTime? validUntil = null)
     {
         Data = entry;
-        ValidUntil = validUntil ?? DateTime.UtcNow.AddMinutes(5);
-        return Data;
+        _hasValue = true;
+        ValidUntil = validUntil ?? DateTime.Now.AddMinutes(5);
+        return entry;
     }
 
     public bool IsNotValid()
-    {
-        return (Data == null || ValidUntil == null || ValidUntil < DateTime.UtcNow);
-    }
+        => !_hasValue || ValidUntil == null || ValidUntil < DateTime.Now;
 
     public bool TryGet(out T value)
     {
-        value = Get();
-        return value != null;
+        if (IsNotValid())
+        {
+            value = default!;
+            return false;
+        }
+        value = Data!;
+        return true;
     }
 
-    public T? Get()
-    {
-        if (Data == null || ValidUntil == null || ValidUntil < DateTime.UtcNow)
-            return default;
-
-        return Data;
-    }
+    public T? Get() => IsNotValid() ? default : Data;
 }
