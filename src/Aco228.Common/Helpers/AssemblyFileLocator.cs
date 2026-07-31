@@ -46,6 +46,17 @@ public static class AssemblyFileLocator
         return true;
     }
     
+    public static bool TryReadAssemblyFileLines(string fileName, out List<string>? fileContent)
+    {
+        fileContent = null;
+        var file = AssemblyFiles.FirstOrDefault(x => x.Name.Contains(fileName, StringComparison.InvariantCultureIgnoreCase));
+        if (file == null)
+            return false;
+        
+        fileContent = File.ReadAllLines(file.FullName).ToList();
+        return true;
+    }
+    
     public static IEnumerable<FileInfo> GetAssemblyFiles(Assembly assembly)
     {
         if(assembly == null)

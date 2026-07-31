@@ -22,6 +22,10 @@ public static class DynamicDependencyInjectionExtension
     {
         ServiceProviderHelper.Initialize(provider);
         CoreStateMachine stateMachine = new CoreStateMachine().SetLimit(25);
+        stateMachine.OnError = (exception, o) =>
+        {
+            Console.WriteLine($"!!!! PostExecution.Exception:: {exception}");
+        };
         
         foreach (var action in _actions)
             stateMachine.Schedule(async () => action(provider));
