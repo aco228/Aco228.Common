@@ -10,7 +10,7 @@ public class FileDownloader : IDisposable, ITransient
     private readonly IStorageManager _storageManager;
     private HttpClient _httpClient;
     private IStorageFolder _defaultFolder;
-    
+
     private static readonly Dictionary<string, string> _mediaTypeExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ["image/jpeg"]  = ".jpg",
@@ -35,7 +35,7 @@ public class FileDownloader : IDisposable, ITransient
     }
 
     public HttpClient HttpClient => _httpClient;
-    
+
     public static FileDownloader Get()
         => new (StorageManager.Instance);
 
@@ -75,8 +75,8 @@ public class FileDownloader : IDisposable, ITransient
     }
 
     public async Task<FileInfo> DownloadFileInfo(
-        string url, 
-        string directoryLocation = "", 
+        string url,
+        string directoryLocation = "",
         string fileName = "",
         bool rename = true)
     {
@@ -158,6 +158,107 @@ public class FileDownloader : IDisposable, ITransient
         return fileInfo;
     }
 
+    public async Task<FileInfo> DownloadFileInfoWithProgress(
+        string url,
+        Action<DownloadProgress> onProgress,
+        string directoryLocation = "",
+        string fileName = "",
+        bool rename = true,
+        CancellationToken cancellationToken = default)
+    {
+        // Handle local paths
+        if (url.StartsWith(@"C:\") || url.StartsWith(@"C:/"))
+            return _defaultFolder.CopyFile(url, IdHelper.GetId("localhost_file"));
+
+        if (url.StartsWith("http://localhost") || url.StartsWith("https://localhost"))
+            return ReadFromLocalhost(url);
+
+        if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+            return ReadFromLocalhost(url);
+
+        if (!string.IsNullOrEmpty(directoryLocation) && !Directory.Exists(directoryLocation))
+            throw new ArgumentException($"Directory does not exist: {directoryLocation}");
+
+        if (string.IsNullOrEmpty(directoryLocation))
+            directoryLocation = _defaultFolder.GetCurrentPath();
+
+        // --- Download file from internet ---
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        using var response = await _httpClient.SendAsync(
+            request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        // 1. Try Content-Disposition filename
+        if (string.IsNullOrEmpty(fileName))
+        {
+            var cd = response.Content.Headers.ContentDisposition;
+            if (cd?.FileNameStar != null)
+                fileName = cd.FileNameStar;
+            else if (cd?.FileName != null)
+                fileName = cd.FileName.Trim('"');
+        }
+
+        // 2. Fall back to URL filename
+        if (string.IsNullOrEmpty(fileName))
+            fileName = StringUrlHelper.GetFileName(url);
+
+        // 3. Resolve extension - try URL/filename first, then Content-Type
+        var extension = Path.GetExtension(fileName);
+
+        if (string.IsNullOrEmpty(extension))
+        {
+            var mediaType = response.Content.Headers.ContentType?.MediaType;
+            if (mediaType != null && _mediaTypeExtensions.TryGetValue(mediaType, out var detectedExt))
+            {
+                extension = detectedExt;
+                fileName += extension;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(extension) && !fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+            fileName += extension;
+
+        if (string.IsNullOrEmpty(fileName))
+            fileName = IdHelper.GetId("dwn") + (extension ?? string.Empty);
+
+        var fileLocation = rename
+            ? Path.Combine(directoryLocation, IdHelper.GetId("dwn") + "_" + fileName)
+            : Path.Combine(directoryLocation, fileName);
+
+        var tempFile = Path.Combine(directoryLocation, Path.GetRandomFileName());
+        var totalBytes = response.Content.Headers.ContentLength;
+
+        await using (var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+        await using (var fileStream = new FileStream(
+                         tempFile, FileMode.Create, FileAccess.Write, FileShare.None,
+                         bufferSize: 81920, useAsync: true))
+        {
+            var buffer = new byte[81920];
+            long totalRead = 0;
+            int bytesRead;
+
+            while ((bytesRead = await responseStream.ReadAsync(buffer, cancellationToken)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                totalRead += bytesRead;
+
+                onProgress?.Invoke(new DownloadProgress
+                {
+                    BytesReceived = totalRead,
+                    TotalBytes = totalBytes
+                });
+            }
+        }
+
+        File.Move(tempFile, fileLocation, overwrite: true);
+
+        var fileInfo = new FileInfo(fileLocation);
+        if (!fileInfo.Exists)
+            throw new IOException($"Error downloading file: {url}");
+
+        return fileInfo;
+    }
+
     private FileInfo ReadFromLocalhost(string url)
     {
         string searchedParam = url.Split("?")[0].GetUntilCharReverse('/');
@@ -175,4 +276,14 @@ public class FileDownloader : IDisposable, ITransient
     {
         _httpClient.Dispose();
     }
+}
+
+public class DownloadProgress
+{
+    public long BytesReceived { get; init; }
+    public long? TotalBytes { get; init; }
+
+    public double? PercentComplete => TotalBytes.HasValue && TotalBytes > 0
+        ? Math.Round((double) BytesReceived / TotalBytes.Value * 100, 1)
+        : null;
 }
