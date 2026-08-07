@@ -176,4 +176,14 @@ public static class StringExtensions
             ? padded.PadRight(maximumLength)
             : padded.PadLeft(maximumLength);
     }
+    
+    public static string Truncate(this string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value) || maxLength < 0)
+            return value;
+
+        return value.Length > maxLength
+            ? value.Substring(0, maxLength)
+            : value;
+    }
 }
