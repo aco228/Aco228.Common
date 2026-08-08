@@ -25,14 +25,16 @@ public class OrderedList<T> : List<T>
         return result;
     }
     
-
     public T? TakeAndRemove()
     {
-        var elem = Take();
-        if (elem == null)
+        if (Count == 0)
             return default;
 
-        Remove(elem);
-        return elem;
+        if (_currentIndex >= Count)
+            _currentIndex = 0;
+
+        var result = this[_currentIndex];
+        RemoveAt(_currentIndex);
+        return result; 
     }
 }
