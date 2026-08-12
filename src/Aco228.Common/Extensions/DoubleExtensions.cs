@@ -11,6 +11,9 @@ public static class DoubleExtensions
     public static string ToDoubleString(this double? input, string extension = "")
         => input.HasValue == false ? string.Empty : input.Value.ToDoubleString();
     
+    public static int ToCeilInt(this double? input)
+        => input.HasValue == false ? 0 : (int)Math.Ceiling(input.Value);
+    
     public static string ToDoubleString(this double input, string extension = "")
         => double.IsNaN(input) || double.IsInfinity(input) 
             ? "0" + extension 
