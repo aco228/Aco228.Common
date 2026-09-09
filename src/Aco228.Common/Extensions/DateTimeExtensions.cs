@@ -53,6 +53,13 @@ public static class DateTimeExtensions
     #endregion
 
     #region Date Comparison
+
+
+    public static bool IsToday(this DateTime dateTime)
+        => dateTime.IsSameDayAs(DateTime.Today);
+    
+    public static bool IsTodayUtc(this DateTime dateTime)
+        => dateTime.IsSameDayAs(DateTime.UtcNow);
     
     public static bool IsSameDayAs(this DateTime dateTime, DateTime compareDate)
         => dateTime.Year == compareDate.Year && dateTime.Month == compareDate.Month && dateTime.Day == compareDate.Day;
