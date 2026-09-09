@@ -244,6 +244,9 @@ public static class DateTimeExtensions
     
     #endregion
 
+    public static string ToKey(this DateTime dateTime)
+        => dateTime.ToString("yyyy-MM-dd");
+
     public static (DateTime Date, string Key, long Unix) ConvertToKey(this DateTime dateTime)
     {
         var date = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
