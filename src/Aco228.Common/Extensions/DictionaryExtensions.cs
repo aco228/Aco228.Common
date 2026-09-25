@@ -44,6 +44,13 @@ public static class DictionaryExtensions
             dictionary.TryAdd(key, value);
     }
 
+    public static T? TryGet<T>(this IDictionary<string, T> dictionary, string key)
+    {
+        if (dictionary.TryGetValue(key, out var value) == false)
+            return default;
+        return value;
+    }
+
     public static void WaitRemove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dictionary, TKey key)
     {
         var starTime = DateTime.Now;
